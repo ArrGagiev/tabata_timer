@@ -17,7 +17,7 @@ class WorkoutBlocksList extends StatelessWidget {
   Widget build(BuildContext context) {
     return SliverReorderableList(
       itemCount: blocks.length,
-      onReorder: onReorder,
+      onReorderItem: onReorder,
       proxyDecorator: _proxyDecorator,
       itemBuilder: (context, index) {
         final WorkoutBlock block = blocks[index];

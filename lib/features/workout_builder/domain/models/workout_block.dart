@@ -12,7 +12,7 @@ abstract class WorkoutBlock {
   });
 }
 
-/// Упражнение по количеству повторений.
+/// Блок с упражнениями на количество повторений.
 class ExerciseBlock extends WorkoutBlock {
   final int repetitions;
   final bool isCompleted;
@@ -27,7 +27,7 @@ class ExerciseBlock extends WorkoutBlock {
   });
 }
 
-/// Упражнение по времени.
+/// Блок с упражнениями на время.
 class TimerBlock extends WorkoutBlock {
   final Duration duration;
 
@@ -40,7 +40,7 @@ class TimerBlock extends WorkoutBlock {
   });
 }
 
-/// Отдых между упражнениями.
+/// Блок с отдыхом.
 class RestBlock extends WorkoutBlock {
   final Duration duration;
 

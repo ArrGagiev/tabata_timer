@@ -7,8 +7,10 @@ class AppColors {
   // Dark theme Text
   static const Color darkText = Color(0xFFFFFFFF);
 
-  // Brand
-  static const Color primary = Color(0xFF6C63FF);
+  // Accent
+  // Пока статичный цвет, но по факту буду делать его
+  // акцентным, предоставляя выбор пользователю
+  static const Color primary = Color(0xFF16831F);
 
   // Light theme
   static const Color lightBackground = Color(0xFFF5F5F5);

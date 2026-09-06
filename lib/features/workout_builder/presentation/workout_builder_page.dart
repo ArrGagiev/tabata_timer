@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:tabata_timer/core/theme/app_typography.dart';
 import 'package:tabata_timer/features/workout_builder/domain/models/workout_block.dart';
 import 'package:tabata_timer/features/workout_builder/widgets/workout_blocks_list.dart';
+
+import '../widgets/workout_action_button.dart';
 
 class WorkoutBuilderPage extends StatefulWidget {
   const WorkoutBuilderPage({super.key});
@@ -10,12 +13,14 @@ class WorkoutBuilderPage extends StatefulWidget {
 }
 
 class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
+  bool _isEditing = false;
+
   final List<WorkoutBlock> _blocks = [
     const ExerciseBlock(
       id: 'exercise_1',
       title: 'Push Ups',
       repetitions: 10,
-      accentColor: 0xFF4CAF50,
+      accentColor: 0xFF16831F,
     ),
     const RestBlock(
       id: 'rest_1',
@@ -55,15 +60,126 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
     });
   }
 
+  void _toggleEditing() {
+    setState(() {
+      _isEditing = !_isEditing;
+    });
+  }
+
+  Future<void> _onAddBlock() async {
+    final String? blockType = await showModalBottomSheet<String>(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.fitness_center),
+                title: const Text('Exercise'),
+                onTap: () {
+                  Navigator.pop(context, 'exercise');
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.timer_outlined),
+                title: const Text('Timer'),
+                onTap: () {
+                  Navigator.pop(context, 'timer');
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.self_improvement),
+                title: const Text('Rest'),
+                onTap: () {
+                  Navigator.pop(context, 'rest');
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (blockType == null) {
+      return;
+    }
+
+    final WorkoutBlock newBlock = switch (blockType) {
+      'exercise' => ExerciseBlock(
+        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        title: 'Exercise',
+        repetitions: 10,
+        accentColor: 0xFF16831F,
+      ),
+      'timer' => TimerBlock(
+        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        title: 'Timer',
+        duration: const Duration(seconds: 30),
+        accentColor: 0xFFFF9800,
+      ),
+      'rest' => RestBlock(
+        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        title: 'Rest',
+        duration: const Duration(seconds: 30),
+        accentColor: 0xFF2196F3,
+      ),
+      _ => throw StateError('Unknown block type: $blockType'),
+    };
+
+    setState(() {
+      _blocks.add(newBlock);
+    });
+  }
+
+  void _onStartWorkout() {
+    // TODO: Запуск тренировки
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Workout Builder')),
+      appBar: AppBar(
+        title: const Text('Workout Builder'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+                minimumSize: Size.zero,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                side: BorderSide(color: Theme.of(context).colorScheme.primary),
+                foregroundColor: Theme.of(context).colorScheme.onSurface,
+                textStyle: context.typography.bodySemiBold,
+              ),
+              onPressed: _toggleEditing,
+              child: Text(_isEditing ? 'Save' : 'Edit'),
+            ),
+          ),
+        ],
+      ),
       body: CustomScrollView(
         slivers: [
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             sliver: WorkoutBlocksList(blocks: _blocks, onReorder: _onReorder),
+          ),
+
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10, 16, 10, 24),
+              child: WorkoutActionButton(
+                isEditing: _isEditing,
+                onPressed: _isEditing ? _onAddBlock : _onStartWorkout,
+              ),
+            ),
           ),
         ],
       ),
