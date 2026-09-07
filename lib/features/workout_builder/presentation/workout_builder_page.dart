@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tabata_timer/core/theme/app_typography.dart';
 
 import '../domain/models/workout_block.dart';
+import '../widgets/add_block/add_block_sheet.dart';
 import '../widgets/workout_action_button.dart';
 import '../widgets/workout_blocks_list.dart';
 
@@ -67,65 +68,31 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
   }
 
   Future<void> _onAddBlock() async {
-    final String? blockType = await showModalBottomSheet<String>(
-      context: context,
-      builder: (context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.fitness_center),
-                title: const Text('Exercise'),
-                onTap: () {
-                  Navigator.pop(context, 'exercise');
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.timer_outlined),
-                title: const Text('Timer'),
-                onTap: () {
-                  Navigator.pop(context, 'timer');
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.self_improvement),
-                title: const Text('Rest'),
-                onTap: () {
-                  Navigator.pop(context, 'rest');
-                },
-              ),
-              const SizedBox(height: 8),
-            ],
-          ),
-        );
-      },
-    );
+    final AddBlockType? blockType = await AddBlockSheet.show(context);
 
     if (blockType == null) {
       return;
     }
 
     final WorkoutBlock newBlock = switch (blockType) {
-      'exercise' => ExerciseBlock(
+      AddBlockType.exercise => ExerciseBlock(
         id: DateTime.now().microsecondsSinceEpoch.toString(),
         title: 'Exercise',
         repetitions: 10,
         accentColor: 0xFF16831F,
       ),
-      'timer' => TimerBlock(
+      AddBlockType.timer => TimerBlock(
         id: DateTime.now().microsecondsSinceEpoch.toString(),
         title: 'Timer',
         duration: const Duration(seconds: 30),
         accentColor: 0xFFFF9800,
       ),
-      'rest' => RestBlock(
+      AddBlockType.rest => RestBlock(
         id: DateTime.now().microsecondsSinceEpoch.toString(),
         title: 'Rest',
         duration: const Duration(seconds: 30),
         accentColor: 0xFF2196F3,
       ),
-      _ => throw StateError('Unknown block type: $blockType'),
     };
 
     setState(() {
