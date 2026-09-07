@@ -14,40 +14,74 @@ class WorkoutActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return isEditing
+        ? _AddBlockButton(onPressed: onPressed)
+        : _StartWorkoutButton(onPressed: onPressed);
+  }
+}
+
+class _AddBlockButton extends StatelessWidget {
+  const _AddBlockButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    final button = OutlinedButton(
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 24),
-        minimumSize: Size.zero,
-        side: BorderSide.none,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        backgroundColor: isEditing ? Colors.transparent : colorScheme.primary,
-        foregroundColor: isEditing
-            ? colorScheme.onSurface
-            : colorScheme.onPrimary,
-        textStyle: context.typography.mediumBold,
-      ),
-      onPressed: onPressed,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (!isEditing) ...[
-            const Icon(Icons.play_arrow),
-            const SizedBox(width: 8),
-          ],
-          Text(isEditing ? '+ Add Block' : 'Start Workout'),
-        ],
+    return CustomPaint(
+      painter: DashedBorderPainter(color: colorScheme.primary, radius: 16),
+      child: OutlinedButton(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size.fromHeight(72),
+          // padding: const EdgeInsets.symmetric(horizontal: 16),
+          side: BorderSide.none,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          foregroundColor: colorScheme.brightness == Brightness.dark
+              ? colorScheme.onSurface
+              : colorScheme.primary,
+          textStyle: context.typography.mediumBold,
+          backgroundColor: colorScheme.primary.withAlpha(60),
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [Icon(Icons.add), SizedBox(width: 8), Text('Add Block')],
+        ),
       ),
     );
+  }
+}
 
-    if (!isEditing) {
-      return button;
-    }
+class _StartWorkoutButton extends StatelessWidget {
+  const _StartWorkoutButton({required this.onPressed});
 
-    return CustomPaint(
-      painter: DashedBorderPainter(color: colorScheme.primary, radius: 12),
-      child: button,
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return FilledButton(
+      onPressed: onPressed,
+      style: FilledButton.styleFrom(
+        minimumSize: const Size.fromHeight(72),
+        // padding: const EdgeInsets.symmetric(horizontal: 24),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
+        textStyle: context.typography.mediumBold,
+      ),
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.play_arrow),
+          SizedBox(width: 8),
+          Text('Start Workout'),
+        ],
+      ),
     );
   }
 }

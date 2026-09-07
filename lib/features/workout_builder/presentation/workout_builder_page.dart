@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:tabata_timer/core/theme/app_typography.dart';
-import 'package:tabata_timer/features/workout_builder/domain/models/workout_block.dart';
-import 'package:tabata_timer/features/workout_builder/widgets/workout_blocks_list.dart';
 
+import '../domain/models/workout_block.dart';
 import '../widgets/workout_action_button.dart';
+import '../widgets/workout_blocks_list.dart';
 
 class WorkoutBuilderPage extends StatefulWidget {
   const WorkoutBuilderPage({super.key});
