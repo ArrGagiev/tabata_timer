@@ -5,6 +5,7 @@ import '../domain/models/workout_block.dart';
 import '../widgets/add_block/add_block_sheet.dart';
 import '../widgets/workout_action_button.dart';
 import '../widgets/workout_blocks_list.dart';
+import '../widgets/edit_block/edit_block_sheet.dart';
 
 class WorkoutBuilderPage extends StatefulWidget {
   const WorkoutBuilderPage({super.key});
@@ -100,6 +101,104 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
     });
   }
 
+  // Отвечает за редактирование блока
+  Future<void> _onEditBlock(WorkoutBlock block) async {
+    final WorkoutBlock? updatedBlock = await EditBlockSheet.show(
+      context,
+      block,
+    );
+
+    if (updatedBlock == null) {
+      return;
+    }
+
+    setState(() {
+      final int index = _blocks.indexWhere((item) => item.id == block.id);
+
+      if (index != -1) {
+        _blocks[index] = updatedBlock;
+      }
+    });
+  }
+
+  Future<void> _onDuplicateBlock(WorkoutBlock block) async {
+    final bool? shouldDuplicate = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Duplicate block?'),
+          content: Text('Do you want to duplicate "${block.title}"?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: const Text('No'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              child: const Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldDuplicate != true) {
+      return;
+    }
+
+    final WorkoutBlock duplicatedBlock = _duplicateBlock(block);
+
+    setState(() {
+      final int index = _blocks.indexWhere((item) => item.id == block.id);
+
+      if (index != -1) {
+        _blocks.insert(index + 1, duplicatedBlock);
+      }
+    });
+  }
+
+  WorkoutBlock _duplicateBlock(WorkoutBlock block) {
+    final String newId = DateTime.now().microsecondsSinceEpoch.toString();
+
+    return switch (block) {
+      ExerciseBlock exercise => ExerciseBlock(
+        id: newId,
+        title: exercise.title,
+        note: exercise.note,
+        accentColor: exercise.accentColor,
+        repetitions: exercise.repetitions,
+        isCompleted: exercise.isCompleted,
+      ),
+      TimerBlock timer => TimerBlock(
+        id: newId,
+        title: timer.title,
+        note: timer.note,
+        accentColor: timer.accentColor,
+        duration: timer.duration,
+      ),
+      RestBlock rest => RestBlock(
+        id: newId,
+        title: rest.title,
+        note: rest.note,
+        accentColor: rest.accentColor,
+        duration: rest.duration,
+      ),
+      _ => block,
+    };
+  }
+
+  void _onChangeBlockColor(WorkoutBlock block) {
+    // TODO: Open color picker.
+  }
+
+  void _onDeleteBlock(WorkoutBlock block) {
+    // TODO: Show confirmation and delete block.
+  }
+
   void _onStartWorkout() {
     // TODO: Запуск тренировки
   }
@@ -136,9 +235,16 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
         slivers: [
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
-            sliver: WorkoutBlocksList(blocks: _blocks, onReorder: _onReorder),
+            sliver: WorkoutBlocksList(
+              blocks: _blocks,
+              isEditing: _isEditing,
+              onReorder: _onReorder,
+              onEdit: _onEditBlock,
+              onDuplicate: _onDuplicateBlock,
+              onChangeColor: _onChangeBlockColor,
+              onDelete: _onDeleteBlock,
+            ),
           ),
-
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(10, 16, 10, 24),

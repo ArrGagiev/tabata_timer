@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
       title: 'TABATA',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.dark,
+      themeMode: ThemeMode.system,
       home: const WorkoutBuilderPage(),
     );
   }
