@@ -30,8 +30,9 @@ class WorkoutBlockCard extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
           child: Row(
             children: [
+              _buildAccentIndicator(),
+              const SizedBox(width: 12),
               Expanded(child: _buildContent()),
-
               if (isEditing)
                 PopupMenuButton<_BlockMenuAction>(
                   icon: const Icon(Icons.more_vert),
@@ -92,6 +93,17 @@ class WorkoutBlockCard extends StatelessWidget {
     );
   }
 
+  Widget _buildAccentIndicator() {
+    return Container(
+      width: 12,
+      height: 12,
+      decoration: BoxDecoration(
+        color: Color(block.accentColor),
+        shape: BoxShape.circle,
+      ),
+    );
+  }
+
   Widget _buildContent() {
     return switch (block) {
       ExerciseBlock exercise => Text(
@@ -106,14 +118,14 @@ class WorkoutBlockCard extends StatelessWidget {
       _ => const SizedBox.shrink(),
     };
   }
+
+  String _formatDuration(Duration duration) {
+    final int minutes = duration.inMinutes;
+    final int seconds = duration.inSeconds % 60;
+
+    return '${minutes.toString().padLeft(2, '0')}:'
+        '${seconds.toString().padLeft(2, '0')}';
+  }
 }
 
 enum _BlockMenuAction { edit, duplicate, changeColor, delete }
-
-String _formatDuration(Duration duration) {
-  final int minutes = duration.inMinutes;
-  final int seconds = duration.inSeconds % 60;
-
-  return '${minutes.toString().padLeft(2, '0')}:'
-      '${seconds.toString().padLeft(2, '0')}';
-}

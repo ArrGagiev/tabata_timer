@@ -28,4 +28,18 @@ class AppColors {
   static const Color success = Color(0xFF4CAF50);
   static const Color error = Color(0xFFF44336);
   static const Color warning = Color(0xFFFF9800);
+
+  // Workout block accent colors
+  static const List<Color> blockAccentColors = [
+    Color(0xFF16831F),
+    Color(0xFF2196F3),
+    Color(0xFFFF9800),
+    Color(0xFF9C27B0),
+    Color(0xFFE91E63),
+    Color(0xFF00ACC1),
+    Color(0xFF795548),
+    Color(0xFF607D8B),
+    Color(0xFFF44336),
+    Color(0xFF8BC34A),
+  ];
 }

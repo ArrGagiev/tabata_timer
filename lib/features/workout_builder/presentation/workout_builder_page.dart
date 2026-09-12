@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tabata_timer/core/theme/app_typography.dart';
+import 'package:tabata_timer/core/theme/app_colors.dart';
 
 import '../domain/models/workout_block.dart';
 import '../widgets/add_block/add_block_sheet.dart';
@@ -191,12 +192,87 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
     };
   }
 
-  void _onChangeBlockColor(WorkoutBlock block) {
-    // TODO: Open color picker.
+  Future<void> _onDeleteBlock(WorkoutBlock block) async {
+    final bool? shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Delete block?'),
+          content: Text('Do you want to delete "${block.title}"?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldDelete != true) {
+      return;
+    }
+
+    setState(() {
+      _blocks.removeWhere((item) => item.id == block.id);
+    });
   }
 
-  void _onDeleteBlock(WorkoutBlock block) {
-    // TODO: Show confirmation and delete block.
+  Future<void> _onChangeBlockColor(WorkoutBlock block) async {
+    final int? selectedColor = await showModalBottomSheet<int>(
+      context: context,
+      builder: (context) {
+        return _BlockColorSheet(currentColor: block.accentColor);
+      },
+    );
+
+    if (selectedColor == null) {
+      return;
+    }
+
+    setState(() {
+      final int index = _blocks.indexWhere((item) => item.id == block.id);
+
+      if (index == -1) {
+        return;
+      }
+
+      final WorkoutBlock updatedBlock = switch (block) {
+        ExerciseBlock exercise => ExerciseBlock(
+          id: exercise.id,
+          title: exercise.title,
+          note: exercise.note,
+          accentColor: selectedColor,
+          repetitions: exercise.repetitions,
+          isCompleted: exercise.isCompleted,
+        ),
+        TimerBlock timer => TimerBlock(
+          id: timer.id,
+          title: timer.title,
+          note: timer.note,
+          accentColor: selectedColor,
+          duration: timer.duration,
+        ),
+        RestBlock rest => RestBlock(
+          id: rest.id,
+          title: rest.title,
+          note: rest.note,
+          accentColor: selectedColor,
+          duration: rest.duration,
+        ),
+        _ => block,
+      };
+
+      _blocks[index] = updatedBlock;
+    });
   }
 
   void _onStartWorkout() {
@@ -255,6 +331,86 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _BlockColorSheet extends StatefulWidget {
+  const _BlockColorSheet({required this.currentColor});
+
+  final int currentColor;
+
+  @override
+  State<_BlockColorSheet> createState() => _BlockColorSheetState();
+}
+
+class _BlockColorSheetState extends State<_BlockColorSheet> {
+  late int _selectedColor;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _selectedColor = widget.currentColor;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text('Change color', style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 24),
+            Wrap(
+              spacing: 16,
+              runSpacing: 16,
+              children: AppColors.blockAccentColors.map((color) {
+                final int colorValue = color.value;
+                final bool isSelected = colorValue == _selectedColor;
+
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedColor = colorValue;
+                    });
+                  },
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                      border: isSelected
+                          ? Border.all(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              width: 3,
+                            )
+                          : null,
+                    ),
+                    child: isSelected
+                        ? Icon(
+                            Icons.check,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          )
+                        : null,
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 28),
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(context, _selectedColor);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ),
       ),
     );
   }
