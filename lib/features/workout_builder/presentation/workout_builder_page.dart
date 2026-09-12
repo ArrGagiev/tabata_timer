@@ -301,6 +301,35 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
     // TODO: Запуск тренировки
   }
 
+  String _formatWorkoutDuration() {
+    int totalSeconds = 0;
+
+    for (final block in _blocks) {
+      switch (block) {
+        case ExerciseBlock exercise:
+          totalSeconds += exercise.repetitions;
+
+        case TimerBlock timer:
+          totalSeconds += timer.duration.inSeconds;
+
+        case RestBlock rest:
+          totalSeconds += rest.duration.inSeconds;
+
+        default:
+          break;
+      }
+    }
+
+    final int minutes = totalSeconds ~/ 60;
+    final int seconds = totalSeconds % 60;
+
+    if (minutes == 0) {
+      return '${seconds}s';
+    }
+
+    return '${minutes}m ${seconds.toString().padLeft(2, '0')}s';
+  }
+
   Widget _buildWorkoutTitle(BuildContext context) {
     if (_isEditing) {
       return SizedBox(
@@ -324,10 +353,7 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
       height: 40,
       child: Align(
         alignment: Alignment.centerLeft,
-        child: Text(
-          _workoutTitle,
-          style: context.typography.headingMedium,
-        ),
+        child: Text(_workoutTitle, style: context.typography.headingMedium),
       ),
     );
   }
@@ -363,9 +389,22 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: _buildWorkoutTitle(context),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildWorkoutTitle(context),
+                const SizedBox(height: 4),
+                Text(
+                  '${_blocks.length} blocks · ~${_formatWorkoutDuration()}',
+                  style: context.typography.bodySmall.copyWith(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withOpacity(0.55),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Divider(height: 1, color: Theme.of(context).dividerColor),
+              ],
             ),
           ),
           Expanded(
