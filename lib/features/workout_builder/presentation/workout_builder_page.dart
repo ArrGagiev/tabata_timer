@@ -19,6 +19,10 @@ class WorkoutBuilderPage extends StatefulWidget {
 class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
   bool _isEditing = false;
 
+  String _workoutTitle = 'New Workout';
+
+  late final TextEditingController _workoutTitleController;
+
   final List<WorkoutBlock> _blocks = [
     const ExerciseBlock(
       id: 'exercise_1',
@@ -52,6 +56,19 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
     ),
   ];
 
+  @override
+  void initState() {
+    super.initState();
+
+    _workoutTitleController = TextEditingController(text: _workoutTitle);
+  }
+
+  @override
+  void dispose() {
+    _workoutTitleController.dispose();
+    super.dispose();
+  }
+
   void _onReorder(int oldIndex, int newIndex) {
     setState(() {
       if (oldIndex < newIndex) {
@@ -65,6 +82,16 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
   }
 
   void _toggleEditing() {
+    if (_isEditing) {
+      final String title = _workoutTitleController.text.trim();
+
+      if (title.isNotEmpty) {
+        _workoutTitle = title;
+      }
+    } else {
+      _workoutTitleController.text = _workoutTitle;
+    }
+
     setState(() {
       _isEditing = !_isEditing;
     });
@@ -274,11 +301,27 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
     // TODO: Запуск тренировки
   }
 
+  Widget _buildWorkoutTitle(BuildContext context) {
+    if (_isEditing) {
+      return TextField(
+        controller: _workoutTitleController,
+        textInputAction: TextInputAction.done,
+        style: context.typography.headingMedium,
+        decoration: const InputDecoration(
+          hintText: 'Workout name',
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.zero,
+        ),
+      );
+    }
+
+    return Text(_workoutTitle, style: context.typography.headingMedium);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Workout Builder'),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
@@ -302,27 +345,40 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
           ),
         ],
       ),
-      body: CustomScrollView(
-        slivers: [
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            sliver: WorkoutBlocksList(
-              blocks: _blocks,
-              isEditing: _isEditing,
-              onReorder: _onReorder,
-              onEdit: _onEditBlock,
-              onDuplicate: _onDuplicateBlock,
-              onChangeColor: _onChangeBlockColor,
-              onDelete: _onDeleteBlock,
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: _buildWorkoutTitle(context),
             ),
           ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(10, 16, 10, 24),
-              child: WorkoutActionButton(
-                isEditing: _isEditing,
-                onPressed: _isEditing ? _onAddBlock : _onStartWorkout,
-              ),
+          Expanded(
+            child: CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  sliver: WorkoutBlocksList(
+                    blocks: _blocks,
+                    isEditing: _isEditing,
+                    onReorder: _onReorder,
+                    onEdit: _onEditBlock,
+                    onDuplicate: _onDuplicateBlock,
+                    onChangeColor: _onChangeBlockColor,
+                    onDelete: _onDeleteBlock,
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(10, 16, 10, 24),
+                    child: WorkoutActionButton(
+                      isEditing: _isEditing,
+                      onPressed: _isEditing ? _onAddBlock : _onStartWorkout,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
