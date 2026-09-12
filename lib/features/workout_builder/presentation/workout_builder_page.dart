@@ -303,19 +303,33 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
 
   Widget _buildWorkoutTitle(BuildContext context) {
     if (_isEditing) {
-      return TextField(
-        controller: _workoutTitleController,
-        textInputAction: TextInputAction.done,
-        style: context.typography.headingMedium,
-        decoration: const InputDecoration(
-          hintText: 'Workout name',
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.zero,
+      return SizedBox(
+        height: 40,
+        child: TextField(
+          controller: _workoutTitleController,
+          textInputAction: TextInputAction.done,
+          textAlignVertical: TextAlignVertical.center,
+          style: context.typography.headingMedium,
+          decoration: const InputDecoration(
+            hintText: 'Workout name',
+            border: InputBorder.none,
+            isDense: true,
+            contentPadding: EdgeInsets.zero,
+          ),
         ),
       );
     }
 
-    return Text(_workoutTitle, style: context.typography.headingMedium);
+    return SizedBox(
+      height: 40,
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          _workoutTitle,
+          style: context.typography.headingMedium,
+        ),
+      ),
+    );
   }
 
   @override
