@@ -4,6 +4,7 @@ import 'package:tabata_timer/core/theme/app_colors.dart';
 
 import '../domain/models/workout_block.dart';
 import '../widgets/add_block/add_block_sheet.dart';
+import '../widgets/create_block/create_block_sheet.dart';
 import '../widgets/workout_action_button.dart';
 import '../widgets/workout_blocks_list.dart';
 import '../widgets/edit_block/edit_block_sheet.dart';
@@ -76,26 +77,20 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
       return;
     }
 
-    final WorkoutBlock newBlock = switch (blockType) {
-      AddBlockType.exercise => ExerciseBlock(
-        id: DateTime.now().microsecondsSinceEpoch.toString(),
-        title: 'Exercise',
-        repetitions: 10,
-        accentColor: 0xFF16831F,
-      ),
-      AddBlockType.timer => TimerBlock(
-        id: DateTime.now().microsecondsSinceEpoch.toString(),
-        title: 'Timer',
-        duration: const Duration(seconds: 30),
-        accentColor: 0xFFFF9800,
-      ),
-      AddBlockType.rest => RestBlock(
-        id: DateTime.now().microsecondsSinceEpoch.toString(),
-        title: 'Rest',
-        duration: const Duration(seconds: 30),
-        accentColor: 0xFF2196F3,
-      ),
+    final CreateBlockType createBlockType = switch (blockType) {
+      AddBlockType.exercise => CreateBlockType.exercise,
+      AddBlockType.timer => CreateBlockType.timer,
+      AddBlockType.rest => CreateBlockType.rest,
     };
+
+    final WorkoutBlock? newBlock = await CreateBlockSheet.show(
+      context,
+      createBlockType,
+    );
+
+    if (newBlock == null) {
+      return;
+    }
 
     setState(() {
       _blocks.add(newBlock);

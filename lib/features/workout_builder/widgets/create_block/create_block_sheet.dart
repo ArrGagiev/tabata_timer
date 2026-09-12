@@ -1,63 +1,65 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../domain/models/workout_block.dart';
 
-class EditBlockSheet extends StatefulWidget {
-  const EditBlockSheet({super.key, required this.block});
+enum CreateBlockType { exercise, timer, rest }
 
-  final WorkoutBlock block;
+class CreateBlockSheet extends StatefulWidget {
+  const CreateBlockSheet({super.key, required this.blockType});
 
-  static Future<WorkoutBlock?> show(BuildContext context, WorkoutBlock block) {
+  final CreateBlockType blockType;
+
+  static Future<WorkoutBlock?> show(
+    BuildContext context,
+    CreateBlockType blockType,
+  ) {
     return showModalBottomSheet<WorkoutBlock>(
       context: context,
       isScrollControlled: true,
-      builder: (_) => EditBlockSheet(block: block),
+      builder: (_) => CreateBlockSheet(blockType: blockType),
     );
   }
 
   @override
-  State<EditBlockSheet> createState() => _EditBlockSheetState();
+  State<CreateBlockSheet> createState() => _CreateBlockSheetState();
 }
 
-class _EditBlockSheetState extends State<EditBlockSheet> {
+class _CreateBlockSheetState extends State<CreateBlockSheet> {
   late final TextEditingController _nameController;
-  late final TextEditingController _valueController;
+  late final TextEditingController _repetitionsController;
 
-  late int _minutes;
-  late int _seconds;
+  late int _selectedColor;
+
+  int _minutes = 0;
+  int _seconds = 30;
 
   @override
   void initState() {
     super.initState();
 
-    _nameController = TextEditingController(text: widget.block.title);
+    _nameController = TextEditingController(
+      text: switch (widget.blockType) {
+        CreateBlockType.exercise => 'Exercise',
+        CreateBlockType.timer => 'Timer',
+        CreateBlockType.rest => 'Rest',
+      },
+    );
 
-    _valueController = TextEditingController(text: _repetitions.toString());
+    _repetitionsController = TextEditingController(text: '10');
 
-    final Duration duration = switch (widget.block) {
-      TimerBlock timer => timer.duration,
-      RestBlock rest => rest.duration,
-      _ => Duration.zero,
-    };
-
-    _minutes = duration.inMinutes;
-    _seconds = duration.inSeconds % 60;
-  }
-
-  int get _repetitions {
-    return switch (widget.block) {
-      ExerciseBlock exercise => exercise.repetitions,
-      _ => 10,
+    _selectedColor = switch (widget.blockType) {
+      CreateBlockType.exercise => 0xFFFF9800,
+      CreateBlockType.timer => 0xFF2196F3,
+      CreateBlockType.rest => 0xFF16831F,
     };
   }
-
-  bool get _isExercise => widget.block is ExerciseBlock;
 
   @override
   void dispose() {
     _nameController.dispose();
-    _valueController.dispose();
+    _repetitionsController.dispose();
     super.dispose();
   }
 
@@ -68,38 +70,43 @@ class _EditBlockSheetState extends State<EditBlockSheet> {
       return;
     }
 
-    final WorkoutBlock updatedBlock = switch (widget.block) {
-      ExerciseBlock exercise => ExerciseBlock(
-        id: exercise.id,
+    final String id = DateTime.now().microsecondsSinceEpoch.toString();
+
+    final WorkoutBlock block = switch (widget.blockType) {
+      CreateBlockType.exercise => ExerciseBlock(
+        id: id,
         title: title,
-        note: exercise.note,
-        accentColor: exercise.accentColor,
-        repetitions: int.tryParse(_valueController.text) ?? 1,
-        isCompleted: exercise.isCompleted,
+        repetitions: int.tryParse(_repetitionsController.text) ?? 1,
+        accentColor: _selectedColor,
       ),
-      TimerBlock timer => TimerBlock(
-        id: timer.id,
+      CreateBlockType.timer => TimerBlock(
+        id: id,
         title: title,
-        note: timer.note,
-        accentColor: timer.accentColor,
         duration: Duration(minutes: _minutes, seconds: _seconds),
+        accentColor: _selectedColor,
       ),
-      RestBlock rest => RestBlock(
-        id: rest.id,
+      CreateBlockType.rest => RestBlock(
+        id: id,
         title: title,
-        note: rest.note,
-        accentColor: rest.accentColor,
         duration: Duration(minutes: _minutes, seconds: _seconds),
+        accentColor: _selectedColor,
       ),
-      _ => widget.block,
     };
 
-    Navigator.pop(context, updatedBlock);
+    Navigator.pop(context, block);
   }
 
   @override
   Widget build(BuildContext context) {
     final double bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+
+    final String title = switch (widget.blockType) {
+      CreateBlockType.exercise => 'Add Exercise',
+      CreateBlockType.timer => 'Add Timer',
+      CreateBlockType.rest => 'Add Rest',
+    };
+
+    final bool isExercise = widget.blockType == CreateBlockType.exercise;
 
     return SafeArea(
       child: Padding(
@@ -108,7 +115,7 @@ class _EditBlockSheetState extends State<EditBlockSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Edit Block', style: Theme.of(context).textTheme.titleLarge),
+            Text(title, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 24),
 
             TextField(
@@ -122,9 +129,9 @@ class _EditBlockSheetState extends State<EditBlockSheet> {
 
             const SizedBox(height: 16),
 
-            if (_isExercise)
+            if (isExercise)
               TextField(
-                controller: _valueController,
+                controller: _repetitionsController,
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: const InputDecoration(
@@ -150,7 +157,50 @@ class _EditBlockSheetState extends State<EditBlockSheet> {
 
             const SizedBox(height: 24),
 
-            FilledButton(onPressed: _save, child: const Text('Save')),
+            Text('Color', style: Theme.of(context).textTheme.titleMedium),
+
+            const SizedBox(height: 12),
+
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: AppColors.blockAccentColors.map((color) {
+                final int colorValue = color.value;
+                final bool isSelected = colorValue == _selectedColor;
+
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedColor = colorValue;
+                    });
+                  },
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                      border: isSelected
+                          ? Border.all(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              width: 3,
+                            )
+                          : null,
+                    ),
+                    child: isSelected
+                        ? Icon(
+                            Icons.check,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          )
+                        : null,
+                  ),
+                );
+              }).toList(),
+            ),
+
+            const SizedBox(height: 28),
+
+            FilledButton(onPressed: _save, child: const Text('Add')),
           ],
         ),
       ),
