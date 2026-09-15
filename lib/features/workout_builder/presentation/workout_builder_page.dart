@@ -11,9 +11,14 @@ import '../widgets/workout_blocks_list.dart';
 import '../widgets/edit_block/edit_block_sheet.dart';
 
 class WorkoutBuilderPage extends StatefulWidget {
-  const WorkoutBuilderPage({super.key, required this.workout});
+  const WorkoutBuilderPage({
+    super.key,
+    required this.workout,
+    this.initiallyEditing = false,
+  });
 
   final Workout workout;
+  final bool initiallyEditing;
 
   @override
   State<WorkoutBuilderPage> createState() => _WorkoutBuilderPageState();
@@ -36,6 +41,8 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
     _blocks = List.of(widget.workout.blocks);
 
     _workoutTitleController = TextEditingController(text: _workoutTitle);
+
+    _isEditing = widget.initiallyEditing;
   }
 
   @override
@@ -346,6 +353,45 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
     );
   }
 
+  // Widget _buildEmptyState(BuildContext context) {
+  //   return SliverFillRemaining(
+  //     hasScrollBody: false,
+  //     child: Center(
+  //       child: Padding(
+  //         padding: const EdgeInsets.symmetric(horizontal: 32),
+  //         child: Column(
+  //           mainAxisAlignment: MainAxisAlignment.center,
+  //           children: [
+  //             Icon(
+  //               Icons.inventory_2_outlined,
+  //               size: 64,
+  //               color: Theme.of(
+  //                 context,
+  //               ).colorScheme.onSurface.withOpacity(0.35),
+  //             ),
+  //             const SizedBox(height: 16),
+  //             Text(
+  //               'No blocks yet',
+  //               style: context.typography.mediumBold,
+  //               textAlign: TextAlign.center,
+  //             ),
+  //             const SizedBox(height: 8),
+  //             Text(
+  //               'Tap Edit to add blocks',
+  //               style: context.typography.bodyRegular.copyWith(
+  //                 color: Theme.of(
+  //                   context,
+  //                 ).colorScheme.onSurface.withOpacity(0.55),
+  //               ),
+  //               textAlign: TextAlign.center,
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -396,27 +442,63 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
             ),
           ),
           Expanded(
-            child: CustomScrollView(
-              slivers: [
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  sliver: WorkoutBlocksList(
-                    blocks: _blocks,
-                    isEditing: _isEditing,
-                    onReorder: _onReorder,
-                    onEdit: _onEditBlock,
-                    onDuplicate: _onDuplicateBlock,
-                    onChangeColor: _onChangeBlockColor,
-                    onDelete: _onDeleteBlock,
-                  ),
+            child: Column(
+              children: [
+                Expanded(
+                  child: _blocks.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.fitness_center_outlined,
+                                size: 48,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withOpacity(0.35),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'No blocks yet',
+                                style: context.typography.mediumBold,
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                'Tap Edit to add blocks',
+                                style: context.typography.bodyRegular.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface.withOpacity(0.55),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : CustomScrollView(
+                          slivers: [
+                            SliverPadding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                              ),
+                              sliver: WorkoutBlocksList(
+                                blocks: _blocks,
+                                isEditing: _isEditing,
+                                onReorder: _onReorder,
+                                onEdit: _onEditBlock,
+                                onDuplicate: _onDuplicateBlock,
+                                onChangeColor: _onChangeBlockColor,
+                                onDelete: _onDeleteBlock,
+                              ),
+                            ),
+                          ],
+                        ),
                 ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(10, 16, 10, 24),
-                    child: WorkoutActionButton(
-                      isEditing: _isEditing,
-                      onPressed: _isEditing ? _onAddBlock : _onStartWorkout,
-                    ),
+
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 16, 10, 24),
+                  child: WorkoutActionButton(
+                    isEditing: _isEditing,
+                    onPressed: _isEditing ? _onAddBlock : _onStartWorkout,
                   ),
                 ),
               ],

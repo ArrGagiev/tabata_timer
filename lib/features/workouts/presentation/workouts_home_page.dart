@@ -54,13 +54,21 @@ class _WorkoutsHomePageState extends State<WorkoutsHomePage> {
       blocks: const [],
     );
 
-    await _openWorkout(workout);
+    await _openWorkout(workout, initiallyEditing: true);
   }
 
-  Future<void> _openWorkout(Workout workout) async {
+  Future<void> _openWorkout(
+    Workout workout, {
+    bool initiallyEditing = false,
+  }) async {
     final Workout? updatedWorkout = await Navigator.push<Workout>(
       context,
-      MaterialPageRoute(builder: (_) => WorkoutBuilderPage(workout: workout)),
+      MaterialPageRoute(
+        builder: (_) => WorkoutBuilderPage(
+          workout: workout,
+          initiallyEditing: initiallyEditing,
+        ),
+      ),
     );
 
     if (updatedWorkout == null) {
