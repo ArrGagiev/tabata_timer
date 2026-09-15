@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tabata_timer/core/theme/app_typography.dart';
 import 'package:tabata_timer/core/theme/app_colors.dart';
 
+import '../../workouts/domain/models/workout.dart';
 import '../domain/models/workout_block.dart';
 import '../widgets/add_block/add_block_sheet.dart';
 import '../widgets/create_block/create_block_sheet.dart';
@@ -10,7 +11,9 @@ import '../widgets/workout_blocks_list.dart';
 import '../widgets/edit_block/edit_block_sheet.dart';
 
 class WorkoutBuilderPage extends StatefulWidget {
-  const WorkoutBuilderPage({super.key});
+  const WorkoutBuilderPage({super.key, required this.workout});
+
+  final Workout workout;
 
   @override
   State<WorkoutBuilderPage> createState() => _WorkoutBuilderPageState();
@@ -19,46 +22,18 @@ class WorkoutBuilderPage extends StatefulWidget {
 class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
   bool _isEditing = false;
 
-  String _workoutTitle = 'New Workout';
-
   late final TextEditingController _workoutTitleController;
 
-  final List<WorkoutBlock> _blocks = [
-    const ExerciseBlock(
-      id: 'exercise_1',
-      title: 'Push Ups',
-      repetitions: 10,
-      accentColor: 0xFF16831F,
-    ),
-    const RestBlock(
-      id: 'rest_1',
-      title: 'Rest',
-      duration: Duration(seconds: 30),
-      accentColor: 0xFF2196F3,
-    ),
-    const TimerBlock(
-      id: 'timer_1',
-      title: 'Plank',
-      duration: Duration(seconds: 45),
-      accentColor: 0xFFFF9800,
-    ),
-    const ExerciseBlock(
-      id: 'exercise_2',
-      title: 'Pull Ups',
-      repetitions: 8,
-      accentColor: 0xFF9C27B0,
-    ),
-    const RestBlock(
-      id: 'rest_2',
-      title: 'Long Rest',
-      duration: Duration(seconds: 60),
-      accentColor: 0xFF2196F3,
-    ),
-  ];
+  late List<WorkoutBlock> _blocks;
+
+  String _workoutTitle = '';
 
   @override
   void initState() {
     super.initState();
+
+    _workoutTitle = widget.workout.title;
+    _blocks = List.of(widget.workout.blocks);
 
     _workoutTitleController = TextEditingController(text: _workoutTitle);
   }
@@ -81,19 +56,32 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
     });
   }
 
-  void _toggleEditing() {
-    if (_isEditing) {
-      final String title = _workoutTitleController.text.trim();
+  void _saveWorkout() {
+    final String title = _workoutTitleController.text.trim();
 
-      if (title.isNotEmpty) {
-        _workoutTitle = title;
-      }
-    } else {
-      _workoutTitleController.text = _workoutTitle;
+    if (title.isEmpty) {
+      return;
     }
 
+    final Workout workout = Workout(
+      id: widget.workout.id,
+      title: title,
+      blocks: List.unmodifiable(_blocks),
+    );
+
+    Navigator.pop(context, workout);
+  }
+
+  void _toggleEditing() {
+    if (_isEditing) {
+      _saveWorkout();
+      return;
+    }
+
+    _workoutTitleController.text = _workoutTitle;
+
     setState(() {
-      _isEditing = !_isEditing;
+      _isEditing = true;
     });
   }
 

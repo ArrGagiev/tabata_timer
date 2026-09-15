@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tabata_timer/core/theme/app_theme.dart';
-import 'package:tabata_timer/features/workout_builder/presentation/workout_builder_page.dart';
+import 'package:tabata_timer/features/workouts/presentation/workouts_home_page.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.system,
-      home: const WorkoutBuilderPage(),
+      home: const WorkoutsHomePage(),
     );
   }
 }
