@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tabata_timer/core/theme/app_typography.dart';
 import 'package:tabata_timer/core/theme/app_colors.dart';
 
+import '../../workout_player/presentation/workout_player_page.dart';
 import '../../workouts/domain/models/workout.dart';
 import '../domain/models/workout_block.dart';
 import '../widgets/add_block/add_block_sheet.dart';
@@ -293,7 +294,18 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
   }
 
   void _onStartWorkout() {
-    // TODO: Запуск тренировки
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => WorkoutPlayerPage(
+          workout: Workout(
+            id: widget.workout.id,
+            title: _workoutTitle,
+            blocks: List.unmodifiable(_blocks),
+          ),
+        ),
+      ),
+    );
   }
 
   String _formatWorkoutDuration() {
