@@ -30,7 +30,7 @@ class WorkoutCard extends StatelessWidget {
               Text(
                 '${workout.blocks.length} blocks',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurface.withOpacity(0.6),
+                  color: colorScheme.onSurface.withAlpha(90),
                 ),
               ),
             ],

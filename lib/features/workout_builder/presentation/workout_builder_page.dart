@@ -353,45 +353,6 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
     );
   }
 
-  // Widget _buildEmptyState(BuildContext context) {
-  //   return SliverFillRemaining(
-  //     hasScrollBody: false,
-  //     child: Center(
-  //       child: Padding(
-  //         padding: const EdgeInsets.symmetric(horizontal: 32),
-  //         child: Column(
-  //           mainAxisAlignment: MainAxisAlignment.center,
-  //           children: [
-  //             Icon(
-  //               Icons.inventory_2_outlined,
-  //               size: 64,
-  //               color: Theme.of(
-  //                 context,
-  //               ).colorScheme.onSurface.withOpacity(0.35),
-  //             ),
-  //             const SizedBox(height: 16),
-  //             Text(
-  //               'No blocks yet',
-  //               style: context.typography.mediumBold,
-  //               textAlign: TextAlign.center,
-  //             ),
-  //             const SizedBox(height: 8),
-  //             Text(
-  //               'Tap Edit to add blocks',
-  //               style: context.typography.bodyRegular.copyWith(
-  //                 color: Theme.of(
-  //                   context,
-  //                 ).colorScheme.onSurface.withOpacity(0.55),
-  //               ),
-  //               textAlign: TextAlign.center,
-  //             ),
-  //           ],
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -433,11 +394,14 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
                   style: context.typography.bodySmall.copyWith(
                     color: Theme.of(
                       context,
-                    ).colorScheme.onSurface.withOpacity(0.55),
+                    ).colorScheme.onSurface.withAlpha(130),
                   ),
                 ),
                 const SizedBox(height: 12),
-                Divider(height: 1, color: Theme.of(context).dividerColor),
+                Divider(
+                  height: 1,
+                  color: Theme.of(context).dividerColor.withAlpha(50),
+                ),
               ],
             ),
           ),
@@ -455,7 +419,7 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
                                 size: 48,
                                 color: Theme.of(
                                   context,
-                                ).colorScheme.onSurface.withOpacity(0.35),
+                                ).colorScheme.onSurface.withAlpha(100),
                               ),
                               const SizedBox(height: 16),
                               Text(
@@ -468,7 +432,7 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
                                 style: context.typography.bodyRegular.copyWith(
                                   color: Theme.of(
                                     context,
-                                  ).colorScheme.onSurface.withOpacity(0.55),
+                                  ).colorScheme.onSurface.withAlpha(130),
                                 ),
                               ),
                             ],

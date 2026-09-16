@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_typography.dart';
 import '../domain/models/workout.dart';
 import '../../workout_builder/domain/models/workout_block.dart';
 import '../../workout_builder/presentation/workout_builder_page.dart';
@@ -91,7 +92,35 @@ class _WorkoutsHomePageState extends State<WorkoutsHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Workouts')),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(70),
+        child: AppBar(
+          flexibleSpace: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 24, top: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Your workouts'.toUpperCase(),
+                    style: context.typography.smallSemiBold.copyWith(
+                      letterSpacing: 2.5,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withAlpha(120),
+                    ),
+                  ),
+                  Text(
+                    'Workouts'.toUpperCase(),
+                    style: context.typography.headingLarge,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+
       body: ListView.separated(
         padding: const EdgeInsets.all(16),
         itemCount: _workouts.length,
