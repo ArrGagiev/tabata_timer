@@ -71,9 +71,16 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
       return;
     }
 
+    setState(() {
+      _workoutTitle = title;
+      _isEditing = false;
+    });
+  }
+
+  void _exitBuilder() {
     final Workout workout = Workout(
       id: widget.workout.id,
-      title: title,
+      title: _workoutTitle,
       blocks: List.unmodifiable(_blocks),
     );
 
@@ -369,6 +376,10 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: _exitBuilder,
+        ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
