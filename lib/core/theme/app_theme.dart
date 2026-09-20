@@ -5,6 +5,11 @@ import 'app_typography.dart';
 
 class AppTheme {
   static ThemeData light = ThemeData(
+    appBarTheme: const AppBarTheme(
+      scrolledUnderElevation: 0,
+      surfaceTintColor: Colors.transparent,
+    ),
+
     brightness: Brightness.light,
     fontFamily: 'Outfit',
 
@@ -21,6 +26,11 @@ class AppTheme {
   );
 
   static ThemeData dark = ThemeData(
+    appBarTheme: const AppBarTheme(
+      scrolledUnderElevation: 0,
+      surfaceTintColor: Colors.transparent,
+    ),
+
     brightness: Brightness.dark,
     fontFamily: 'Outfit',
 

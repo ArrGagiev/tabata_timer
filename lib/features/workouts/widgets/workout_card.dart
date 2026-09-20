@@ -80,37 +80,19 @@ class WorkoutCard extends StatelessWidget {
   }
 
   void _showColorPicker(BuildContext context) {
-    final List<Color> colors = AppColors.blockAccentColors;
-
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
       builder: (context) {
-        final Color surfaceColor = Theme.of(context).colorScheme.surface;
+        final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
-          child: Wrap(
-            spacing: 16,
-            runSpacing: 16,
-            children: colors.map((color) {
-              return GestureDetector(
-                onTap: () {
-                  Navigator.pop(context);
-                  onChangeColor(color.toARGB32());
-                },
-                child: Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: color,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: surfaceColor, width: 2),
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
+        return _WorkoutColorSheet(
+          currentColor: workout.accentColor,
+          colorScheme: colorScheme,
+          onColorSelected: (color) {
+            Navigator.pop(context);
+            onChangeColor(color);
+          },
         );
       },
     );
@@ -183,13 +165,10 @@ class WorkoutCard extends StatelessWidget {
                       ],
                     ),
                   ),
-
                   const SizedBox(width: 12),
-
                   Stack(
                     alignment: Alignment.topRight,
                     children: [
-                      // Количество блоков
                       Padding(
                         padding: const EdgeInsets.only(right: 16, left: 12),
                         child: ShaderMask(
@@ -212,8 +191,6 @@ class WorkoutCard extends StatelessWidget {
                           ),
                         ),
                       ),
-
-                      // Меню
                       Positioned(
                         top: -12,
                         right: -16,
@@ -261,6 +238,53 @@ class WorkoutCard extends StatelessWidget {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _WorkoutColorSheet extends StatelessWidget {
+  const _WorkoutColorSheet({
+    required this.currentColor,
+    required this.colorScheme,
+    required this.onColorSelected,
+  });
+
+  final int currentColor;
+  final ColorScheme colorScheme;
+  final ValueChanged<int> onColorSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+        child: Wrap(
+          spacing: 16,
+          runSpacing: 16,
+          children: AppColors.blockAccentColors.map((color) {
+            final int colorValue = color.toARGB32();
+            final bool isSelected = colorValue == currentColor;
+
+            return GestureDetector(
+              onTap: () => onColorSelected(colorValue),
+              child: Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                  border: isSelected
+                      ? Border.all(color: colorScheme.onSurface, width: 3)
+                      : Border.all(color: colorScheme.surface, width: 2),
+                ),
+                child: isSelected
+                    ? Icon(Icons.check, color: colorScheme.onPrimary)
+                    : null,
+              ),
+            );
+          }).toList(),
         ),
       ),
     );

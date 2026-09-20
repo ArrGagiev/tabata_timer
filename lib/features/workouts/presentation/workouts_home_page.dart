@@ -98,7 +98,35 @@ class _WorkoutsHomePageState extends State<WorkoutsHomePage> {
     });
   }
 
-  void _duplicateWorkout(Workout workout) {
+  Future<void> _duplicateWorkout(Workout workout) async {
+    final bool? shouldDuplicate = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Duplicate workout?'),
+          content: Text('Do you want to duplicate "${workout.title}"?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: const Text('No'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              child: const Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldDuplicate != true || !mounted) {
+      return;
+    }
+
     final String workoutId = DateTime.now().microsecondsSinceEpoch.toString();
 
     final Workout duplicate = Workout(
@@ -137,7 +165,13 @@ class _WorkoutsHomePageState extends State<WorkoutsHomePage> {
     );
 
     setState(() {
-      _workouts.add(duplicate);
+      final int index = _workouts.indexWhere((item) => item.id == workout.id);
+
+      if (index == -1) {
+        _workouts.add(duplicate);
+      } else {
+        _workouts.insert(index + 1, duplicate);
+      }
     });
   }
 
@@ -170,31 +204,9 @@ class _WorkoutsHomePageState extends State<WorkoutsHomePage> {
       return;
     }
 
-    final int index = _workouts.indexWhere((item) => item.id == workout.id);
-
-    if (index == -1) {
-      return;
-    }
-
     setState(() {
-      _workouts.removeAt(index);
+      _workouts.removeWhere((item) => item.id == workout.id);
     });
-
-    ScaffoldMessenger.of(context).clearSnackBars();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('"${workout.title}" deleted'),
-        action: SnackBarAction(
-          label: 'Undo',
-          onPressed: () {
-            setState(() {
-              _workouts.insert(index.clamp(0, _workouts.length), workout);
-            });
-          },
-        ),
-      ),
-    );
   }
 
   void _changeWorkoutColor(Workout workout, int color) {
@@ -240,27 +252,66 @@ class _WorkoutsHomePageState extends State<WorkoutsHomePage> {
           ),
         ),
       ),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: _workouts.length,
-        separatorBuilder: (_, _) => const SizedBox(height: 12),
-        itemBuilder: (context, index) {
-          final Workout workout = _workouts[index];
+      body: _workouts.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.fitness_center_outlined,
+                    size: 48,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withAlpha(100),
+                  ),
+                  const SizedBox(height: 16),
+                  Text('No workouts yet', style: context.typography.mediumBold),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Tap + to create your first workout',
+                    style: context.typography.bodyRegular.copyWith(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withAlpha(130),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: _workouts.length,
+              separatorBuilder: (_, _) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final Workout workout = _workouts[index];
 
-          return WorkoutCard(
-            workout: workout,
-            onTap: () => _openWorkout(workout),
-            onDuplicate: () => _duplicateWorkout(workout),
-            onDelete: () => _deleteWorkout(workout),
-            onChangeColor: (color) {
-              _changeWorkoutColor(workout, color);
-            },
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _createWorkout,
-        child: const Icon(Icons.add),
+                return WorkoutCard(
+                  workout: workout,
+                  onTap: () => _openWorkout(workout),
+                  onDuplicate: () => _duplicateWorkout(workout),
+                  onDelete: () => _deleteWorkout(workout),
+                  onChangeColor: (color) {
+                    _changeWorkoutColor(workout, color);
+                  },
+                );
+              },
+            ),
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).colorScheme.primary.withAlpha(100),
+              blurRadius: 18,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: FloatingActionButton(
+          shape: const CircleBorder(),
+          onPressed: _createWorkout,
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
