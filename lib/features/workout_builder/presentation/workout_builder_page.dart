@@ -82,6 +82,7 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
       id: widget.workout.id,
       title: _workoutTitle,
       blocks: List.unmodifiable(_blocks),
+      accentColor: widget.workout.accentColor,
     );
 
     Navigator.pop(context, workout);
@@ -309,6 +310,7 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
             id: widget.workout.id,
             title: _workoutTitle,
             blocks: List.unmodifiable(_blocks),
+            accentColor: widget.workout.accentColor,
           ),
         ),
       ),

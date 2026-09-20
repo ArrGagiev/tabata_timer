@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../workout_builder/domain/models/workout_block.dart';
 import '../domain/models/workout.dart';
@@ -79,15 +80,7 @@ class WorkoutCard extends StatelessWidget {
   }
 
   void _showColorPicker(BuildContext context) {
-    const List<int> colors = [
-      0xFF6C63FF,
-      0xFF16831F,
-      0xFFFF9800,
-      0xFFE53935,
-      0xFF00A6A6,
-      0xFF9C27B0,
-      0xFF2196F3,
-    ];
+    final List<Color> colors = AppColors.blockAccentColors;
 
     showModalBottomSheet<void>(
       context: context,
@@ -100,13 +93,11 @@ class WorkoutCard extends StatelessWidget {
           child: Wrap(
             spacing: 16,
             runSpacing: 16,
-            children: colors.map((value) {
-              final Color color = Color(value);
-
+            children: colors.map((color) {
               return GestureDetector(
                 onTap: () {
                   Navigator.pop(context);
-                  onChangeColor(value);
+                  onChangeColor(color.toARGB32());
                 },
                 child: Container(
                   width: 44,
@@ -128,21 +119,18 @@ class WorkoutCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
     final Color accentColor = Color(workout.accentColor);
 
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(26),
         gradient: LinearGradient(
-          begin: Alignment.centerLeft, // Начало градиента слева
-          end: Alignment.centerRight, // Конец градиента справа
-          colors: [
-            accentColor.withAlpha(100), // Исходный цвет слева
-            accentColor.withAlpha(30), // Полностью прозрачный цвет справа
-          ],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [accentColor.withAlpha(100), accentColor.withAlpha(30)],
         ),
       ),
-
       padding: const EdgeInsets.all(2.5),
       child: Container(
         decoration: BoxDecoration(
@@ -187,8 +175,6 @@ class WorkoutCard extends StatelessWidget {
                             spacing: 4,
                             runSpacing: 6,
                             children: workout.blocks
-                                // Берет только первые N элементов
-                                // (или меньше, если их всего < N)
                                 .take(5)
                                 .map((block) => _buildBlockChip(context, block))
                                 .toList(),
@@ -207,15 +193,12 @@ class WorkoutCard extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(right: 16, left: 12),
                         child: ShaderMask(
-                          // Указывает, что градиент должен красить только сам текст
                           blendMode: BlendMode.srcIn,
                           shaderCallback: (bounds) => LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.centerRight,
                             colors: [
-                              // Исходный цвет слева
                               colorScheme.onSurface.withAlpha(20),
-                              // Уходит в прозрачный справа
                               colorScheme.onSurface.withAlpha(5),
                             ],
                           ).createShader(bounds),
@@ -224,14 +207,13 @@ class WorkoutCard extends StatelessWidget {
                             style: context.typography.headingLarge.copyWith(
                               fontSize: 80,
                               height: 1.1,
-                              // ОБЯЗАТЕЛЬНО белый, чтобы градиент лег корректно
                               color: Colors.white,
                             ),
                           ),
                         ),
                       ),
 
-                      // Меню поверх, в правом верхнем углу
+                      // Меню
                       Positioned(
                         top: -12,
                         right: -16,
@@ -240,6 +222,7 @@ class WorkoutCard extends StatelessWidget {
                             overlayColor: WidgetStateProperty.all(
                               Colors.transparent,
                             ),
+                            splashFactory: NoSplash.splashFactory,
                           ),
                           icon: const Icon(Icons.more_vert),
                           tooltip: 'Workout options',

@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:tabata_timer/core/theme/app_colors.dart';
 
 import '../../../core/theme/app_typography.dart';
 import '../../workout_builder/domain/models/workout_block.dart';
@@ -49,10 +52,16 @@ class _WorkoutsHomePageState extends State<WorkoutsHomePage> {
       return;
     }
 
+    final Color randomColor =
+        AppColors.blockAccentColors[Random().nextInt(
+          AppColors.blockAccentColors.length,
+        )];
+
     final Workout workout = Workout(
       id: DateTime.now().microsecondsSinceEpoch.toString(),
       title: title,
       blocks: const [],
+      accentColor: randomColor.toARGB32(),
     );
 
     await _openWorkout(workout, initiallyEditing: true);
@@ -132,10 +141,60 @@ class _WorkoutsHomePageState extends State<WorkoutsHomePage> {
     });
   }
 
-  void _deleteWorkout(Workout workout) {
+  Future<void> _deleteWorkout(Workout workout) async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Delete workout?'),
+          content: Text('Are you sure you want to delete "${workout.title}"?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true || !mounted) {
+      return;
+    }
+
+    final int index = _workouts.indexWhere((item) => item.id == workout.id);
+
+    if (index == -1) {
+      return;
+    }
+
     setState(() {
-      _workouts.removeWhere((item) => item.id == workout.id);
+      _workouts.removeAt(index);
     });
+
+    ScaffoldMessenger.of(context).clearSnackBars();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('"${workout.title}" deleted'),
+        action: SnackBarAction(
+          label: 'Undo',
+          onPressed: () {
+            setState(() {
+              _workouts.insert(index.clamp(0, _workouts.length), workout);
+            });
+          },
+        ),
+      ),
+    );
   }
 
   void _changeWorkoutColor(Workout workout, int color) {
