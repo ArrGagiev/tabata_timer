@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_typography.dart';
-import '../domain/models/workout.dart';
 import '../../workout_builder/domain/models/workout_block.dart';
 import '../../workout_builder/presentation/workout_builder_page.dart';
+import '../domain/models/workout.dart';
 import '../widgets/create_workout_sheet.dart';
 import '../widgets/workout_card.dart';
 
@@ -89,6 +89,67 @@ class _WorkoutsHomePageState extends State<WorkoutsHomePage> {
     });
   }
 
+  void _duplicateWorkout(Workout workout) {
+    final String workoutId = DateTime.now().microsecondsSinceEpoch.toString();
+
+    final Workout duplicate = Workout(
+      id: workoutId,
+      title: '${workout.title} Copy',
+      accentColor: workout.accentColor,
+      blocks: workout.blocks.map((block) {
+        final String blockId =
+            '${DateTime.now().microsecondsSinceEpoch}_${block.id}';
+
+        return switch (block) {
+          ExerciseBlock exercise => ExerciseBlock(
+            id: blockId,
+            title: exercise.title,
+            note: exercise.note,
+            accentColor: exercise.accentColor,
+            repetitions: exercise.repetitions,
+          ),
+          TimerBlock timer => TimerBlock(
+            id: blockId,
+            title: timer.title,
+            note: timer.note,
+            accentColor: timer.accentColor,
+            duration: timer.duration,
+          ),
+          RestBlock rest => RestBlock(
+            id: blockId,
+            title: rest.title,
+            note: rest.note,
+            accentColor: rest.accentColor,
+            duration: rest.duration,
+          ),
+          _ => throw UnsupportedError('Unsupported workout block type'),
+        };
+      }).toList(),
+    );
+
+    setState(() {
+      _workouts.add(duplicate);
+    });
+  }
+
+  void _deleteWorkout(Workout workout) {
+    setState(() {
+      _workouts.removeWhere((item) => item.id == workout.id);
+    });
+  }
+
+  void _changeWorkoutColor(Workout workout, int color) {
+    setState(() {
+      final int index = _workouts.indexWhere((item) => item.id == workout.id);
+
+      if (index == -1) {
+        return;
+      }
+
+      _workouts[index] = workout.copyWith(accentColor: color);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -120,7 +181,6 @@ class _WorkoutsHomePageState extends State<WorkoutsHomePage> {
           ),
         ),
       ),
-
       body: ListView.separated(
         padding: const EdgeInsets.all(16),
         itemCount: _workouts.length,
@@ -131,6 +191,11 @@ class _WorkoutsHomePageState extends State<WorkoutsHomePage> {
           return WorkoutCard(
             workout: workout,
             onTap: () => _openWorkout(workout),
+            onDuplicate: () => _duplicateWorkout(workout),
+            onDelete: () => _deleteWorkout(workout),
+            onChangeColor: (color) {
+              _changeWorkoutColor(workout, color);
+            },
           );
         },
       ),
