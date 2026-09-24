@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/bottom_sheet/app_bottom_sheet.dart';
+import '../../../../core/widgets/bottom_sheet/app_duration_fields.dart';
+import '../../../../core/widgets/bottom_sheet/app_text_field.dart';
+import '../../../../core/widgets/bottom_sheet/app_number_field.dart';
 import '../../domain/models/workout_block.dart';
 
 enum CreateBlockType { exercise, timer, rest }
@@ -15,9 +18,13 @@ class CreateBlockSheet extends StatefulWidget {
     BuildContext context,
     CreateBlockType blockType,
   ) {
-    return showModalBottomSheet<WorkoutBlock>(
+    return AppBottomSheet.show<WorkoutBlock>(
       context: context,
-      isScrollControlled: true,
+      title: switch (blockType) {
+        CreateBlockType.exercise => 'Add Exercise',
+        CreateBlockType.timer => 'Add Timer',
+        CreateBlockType.rest => 'Add Rest',
+      },
       builder: (_) => CreateBlockSheet(blockType: blockType),
     );
   }
@@ -29,11 +36,10 @@ class CreateBlockSheet extends StatefulWidget {
 class _CreateBlockSheetState extends State<CreateBlockSheet> {
   late final TextEditingController _nameController;
   late final TextEditingController _repetitionsController;
+  late final TextEditingController _minutesController;
+  late final TextEditingController _secondsController;
 
   late int _selectedColor;
-
-  int _minutes = 0;
-  int _seconds = 30;
 
   @override
   void initState() {
@@ -49,6 +55,10 @@ class _CreateBlockSheetState extends State<CreateBlockSheet> {
 
     _repetitionsController = TextEditingController(text: '10');
 
+    _minutesController = TextEditingController(text: '0');
+
+    _secondsController = TextEditingController(text: '30');
+
     _selectedColor = switch (widget.blockType) {
       CreateBlockType.exercise => 0xFFFF9800,
       CreateBlockType.timer => 0xFF2196F3,
@@ -60,6 +70,8 @@ class _CreateBlockSheetState extends State<CreateBlockSheet> {
   void dispose() {
     _nameController.dispose();
     _repetitionsController.dispose();
+    _minutesController.dispose();
+    _secondsController.dispose();
     super.dispose();
   }
 
@@ -72,23 +84,31 @@ class _CreateBlockSheetState extends State<CreateBlockSheet> {
 
     final String id = DateTime.now().microsecondsSinceEpoch.toString();
 
+    final int repetitions = int.tryParse(_repetitionsController.text) ?? 1;
+
+    final int minutes = int.tryParse(_minutesController.text) ?? 0;
+
+    final int seconds = int.tryParse(_secondsController.text) ?? 0;
+
     final WorkoutBlock block = switch (widget.blockType) {
       CreateBlockType.exercise => ExerciseBlock(
         id: id,
         title: title,
-        repetitions: int.tryParse(_repetitionsController.text) ?? 1,
+        repetitions: repetitions,
         accentColor: _selectedColor,
       ),
+
       CreateBlockType.timer => TimerBlock(
         id: id,
         title: title,
-        duration: Duration(minutes: _minutes, seconds: _seconds),
+        duration: Duration(minutes: minutes, seconds: seconds),
         accentColor: _selectedColor,
       ),
+
       CreateBlockType.rest => RestBlock(
         id: id,
         title: title,
-        duration: Duration(minutes: _minutes, seconds: _seconds),
+        duration: Duration(minutes: minutes, seconds: seconds),
         accentColor: _selectedColor,
       ),
     };
@@ -98,211 +118,81 @@ class _CreateBlockSheetState extends State<CreateBlockSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final double bottomInset = MediaQuery.viewInsetsOf(context).bottom;
-
-    final String title = switch (widget.blockType) {
-      CreateBlockType.exercise => 'Add Exercise',
-      CreateBlockType.timer => 'Add Timer',
-      CreateBlockType.rest => 'Add Rest',
-    };
-
     final bool isExercise = widget.blockType == CreateBlockType.exercise;
 
-    return SafeArea(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + bottomInset),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(title, style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 24),
-
-            TextField(
-              controller: _nameController,
-              textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(
-                labelText: 'Name',
-                border: OutlineInputBorder(),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            if (isExercise)
-              TextField(
-                controller: _repetitionsController,
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: const InputDecoration(
-                  labelText: 'Repetitions',
-                  border: OutlineInputBorder(),
-                ),
-              )
-            else
-              _DurationFields(
-                minutes: _minutes,
-                seconds: _seconds,
-                onMinutesChanged: (value) {
-                  setState(() {
-                    _minutes = value;
-                  });
-                },
-                onSecondsChanged: (value) {
-                  setState(() {
-                    _seconds = value;
-                  });
-                },
-              ),
-
-            const SizedBox(height: 24),
-
-            Text('Color', style: Theme.of(context).textTheme.titleMedium),
-
-            const SizedBox(height: 12),
-
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: AppColors.blockAccentColors.map((color) {
-                final int colorValue = color.value;
-                final bool isSelected = colorValue == _selectedColor;
-
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedColor = colorValue;
-                    });
-                  },
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                      border: isSelected
-                          ? Border.all(
-                              color: Theme.of(context).colorScheme.onSurface,
-                              width: 3,
-                            )
-                          : null,
-                    ),
-                    child: isSelected
-                        ? Icon(
-                            Icons.check,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          )
-                        : null,
-                  ),
-                );
-              }).toList(),
-            ),
-
-            const SizedBox(height: 28),
-
-            FilledButton(onPressed: _save, child: const Text('Add')),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DurationFields extends StatelessWidget {
-  const _DurationFields({
-    required this.minutes,
-    required this.seconds,
-    required this.onMinutesChanged,
-    required this.onSecondsChanged,
-  });
-
-  final int minutes;
-  final int seconds;
-
-  final ValueChanged<int> onMinutesChanged;
-  final ValueChanged<int> onSecondsChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(
-          child: _NumberField(
-            label: 'Minutes',
-            value: minutes,
-            onChanged: onMinutesChanged,
-          ),
+        AppTextField(
+          controller: _nameController,
+          label: 'Name',
+          textInputAction: isExercise
+              ? TextInputAction.next
+              : TextInputAction.done,
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _NumberField(
-            label: 'Seconds',
-            value: seconds,
-            onChanged: onSecondsChanged,
+
+        const SizedBox(height: 16),
+
+        if (isExercise)
+          AppNumberField(
+            controller: _repetitionsController,
+            label: 'Repetitions',
+            textInputAction: TextInputAction.done,
+          )
+        else
+          AppDurationFields(
+            minutesController: _minutesController,
+            secondsController: _secondsController,
           ),
+
+        const SizedBox(height: 24),
+
+        Text('Color', style: Theme.of(context).textTheme.titleMedium),
+
+        const SizedBox(height: 12),
+
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: AppColors.blockAccentColors.map((color) {
+            final int colorValue = color.toARGB32();
+            final bool isSelected = colorValue == _selectedColor;
+
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedColor = colorValue;
+                });
+              },
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                  border: isSelected
+                      ? Border.all(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          width: 3,
+                        )
+                      : null,
+                ),
+                child: isSelected
+                    ? Icon(
+                        Icons.check,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      )
+                    : null,
+              ),
+            );
+          }).toList(),
         ),
+
+        const SizedBox(height: 28),
+
+        FilledButton(onPressed: _save, child: const Text('Add')),
       ],
     );
-  }
-}
-
-class _NumberField extends StatelessWidget {
-  const _NumberField({
-    required this.label,
-    required this.value,
-    required this.onChanged,
-  });
-
-  final String label;
-  final int value;
-
-  final ValueChanged<int> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      initialValue: value.toString(),
-      keyboardType: TextInputType.number,
-      inputFormatters: [
-        FilteringTextInputFormatter.digitsOnly,
-        LengthLimitingTextInputFormatter(2),
-        _MaxValueInputFormatter(59),
-      ],
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-      ),
-      onChanged: (text) {
-        final int? value = int.tryParse(text);
-
-        if (value != null && value <= 59) {
-          onChanged(value);
-        }
-      },
-    );
-  }
-}
-
-class _MaxValueInputFormatter extends TextInputFormatter {
-  _MaxValueInputFormatter(this.maxValue);
-
-  final int maxValue;
-
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    if (newValue.text.isEmpty) {
-      return newValue;
-    }
-
-    final int? value = int.tryParse(newValue.text);
-
-    if (value == null || value > maxValue) {
-      return oldValue;
-    }
-
-    return newValue;
   }
 }

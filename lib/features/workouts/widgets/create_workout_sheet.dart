@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/widgets/bottom_sheet/app_bottom_sheet.dart';
+import '../../../core/widgets/bottom_sheet/app_text_field.dart';
+
 class CreateWorkoutSheet extends StatefulWidget {
   const CreateWorkoutSheet({super.key});
 
   static Future<String?> show(BuildContext context) {
-    return showModalBottomSheet<String>(
+    return AppBottomSheet.show<String>(
       context: context,
-      isScrollControlled: true,
+      title: 'New Workout',
       builder: (_) => const CreateWorkoutSheet(),
     );
   }
@@ -42,36 +45,22 @@ class _CreateWorkoutSheetState extends State<CreateWorkoutSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
-
-    return SafeArea(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + bottomInset),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('New Workout', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _controller,
-              autofocus: true,
-              textInputAction: TextInputAction.done,
-              onSubmitted: (_) => _createWorkout(),
-              decoration: const InputDecoration(
-                labelText: 'Workout name',
-                hintText: 'Leg Day',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 20),
-            FilledButton(
-              onPressed: _createWorkout,
-              child: const Text('Create'),
-            ),
-          ],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        AppTextField(
+          controller: _controller,
+          label: 'Workout name',
+          hintText: 'Leg Day',
+          textInputAction: TextInputAction.done,
+          autofocus: true,
         ),
-      ),
+
+        const SizedBox(height: 20),
+
+        FilledButton(onPressed: _createWorkout, child: const Text('Create')),
+      ],
     );
   }
 }

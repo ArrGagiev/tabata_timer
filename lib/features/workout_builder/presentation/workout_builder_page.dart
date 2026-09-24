@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tabata_timer/core/theme/app_typography.dart';
-import 'package:tabata_timer/core/theme/app_colors.dart';
 
+import '../../../core/widgets/bottom_sheet/app_color_picker_sheet.dart';
 import '../../workout_player/presentation/workout_player_page.dart';
 import '../../workouts/domain/models/workout.dart';
 import '../domain/models/workout_block.dart';
@@ -253,11 +253,9 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
   }
 
   Future<void> _onChangeBlockColor(WorkoutBlock block) async {
-    final int? selectedColor = await showModalBottomSheet<int>(
-      context: context,
-      builder: (context) {
-        return _BlockColorSheet(currentColor: block.accentColor);
-      },
+    final int? selectedColor = await AppColorPickerSheet.show(
+      context,
+      currentColor: block.accentColor,
     );
 
     if (selectedColor == null) {
@@ -494,86 +492,6 @@ class _WorkoutBuilderPageState extends State<WorkoutBuilderPage> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _BlockColorSheet extends StatefulWidget {
-  const _BlockColorSheet({required this.currentColor});
-
-  final int currentColor;
-
-  @override
-  State<_BlockColorSheet> createState() => _BlockColorSheetState();
-}
-
-class _BlockColorSheetState extends State<_BlockColorSheet> {
-  late int _selectedColor;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _selectedColor = widget.currentColor;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('Change color', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 24),
-            Wrap(
-              spacing: 16,
-              runSpacing: 16,
-              children: AppColors.blockAccentColors.map((color) {
-                final int colorValue = color.value;
-                final bool isSelected = colorValue == _selectedColor;
-
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedColor = colorValue;
-                    });
-                  },
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                      border: isSelected
-                          ? Border.all(
-                              color: Theme.of(context).colorScheme.onSurface,
-                              width: 3,
-                            )
-                          : null,
-                    ),
-                    child: isSelected
-                        ? Icon(
-                            Icons.check,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          )
-                        : null,
-                  ),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 28),
-            FilledButton(
-              onPressed: () {
-                Navigator.pop(context, _selectedColor);
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        ),
       ),
     );
   }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/bottom_sheet/app_color_picker_sheet.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../workout_builder/domain/models/workout_block.dart';
 import '../domain/models/workout.dart';
@@ -79,23 +79,17 @@ class WorkoutCard extends StatelessWidget {
     );
   }
 
-  void _showColorPicker(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      builder: (context) {
-        final ColorScheme colorScheme = Theme.of(context).colorScheme;
-
-        return _WorkoutColorSheet(
-          currentColor: workout.accentColor,
-          colorScheme: colorScheme,
-          onColorSelected: (color) {
-            Navigator.pop(context);
-            onChangeColor(color);
-          },
-        );
-      },
+  Future<void> _showColorPicker(BuildContext context) async {
+    final int? selectedColor = await AppColorPickerSheet.show(
+      context,
+      currentColor: workout.accentColor,
     );
+
+    if (selectedColor == null) {
+      return;
+    }
+
+    onChangeColor(selectedColor);
   }
 
   @override
@@ -238,53 +232,6 @@ class WorkoutCard extends StatelessWidget {
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _WorkoutColorSheet extends StatelessWidget {
-  const _WorkoutColorSheet({
-    required this.currentColor,
-    required this.colorScheme,
-    required this.onColorSelected,
-  });
-
-  final int currentColor;
-  final ColorScheme colorScheme;
-  final ValueChanged<int> onColorSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-        child: Wrap(
-          spacing: 16,
-          runSpacing: 16,
-          children: AppColors.blockAccentColors.map((color) {
-            final int colorValue = color.toARGB32();
-            final bool isSelected = colorValue == currentColor;
-
-            return GestureDetector(
-              onTap: () => onColorSelected(colorValue),
-              child: Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                  border: isSelected
-                      ? Border.all(color: colorScheme.onSurface, width: 3)
-                      : Border.all(color: colorScheme.surface, width: 2),
-                ),
-                child: isSelected
-                    ? Icon(Icons.check, color: colorScheme.onPrimary)
-                    : null,
-              ),
-            );
-          }).toList(),
         ),
       ),
     );

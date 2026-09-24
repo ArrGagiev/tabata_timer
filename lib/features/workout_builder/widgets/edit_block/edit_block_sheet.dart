@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
+import '../../../../core/widgets/bottom_sheet/app_bottom_sheet.dart';
+import '../../../../core/widgets/bottom_sheet/app_duration_fields.dart';
+import '../../../../core/widgets/bottom_sheet/app_number_field.dart';
+import '../../../../core/widgets/bottom_sheet/app_text_field.dart';
 import '../../domain/models/workout_block.dart';
 
 class EditBlockSheet extends StatefulWidget {
@@ -9,9 +12,9 @@ class EditBlockSheet extends StatefulWidget {
   final WorkoutBlock block;
 
   static Future<WorkoutBlock?> show(BuildContext context, WorkoutBlock block) {
-    return showModalBottomSheet<WorkoutBlock>(
+    return AppBottomSheet.show<WorkoutBlock>(
       context: context,
-      isScrollControlled: true,
+      title: 'Edit Block',
       builder: (_) => EditBlockSheet(block: block),
     );
   }
@@ -22,10 +25,11 @@ class EditBlockSheet extends StatefulWidget {
 
 class _EditBlockSheetState extends State<EditBlockSheet> {
   late final TextEditingController _nameController;
-  late final TextEditingController _valueController;
+  late final TextEditingController _repetitionsController;
+  late final TextEditingController _minutesController;
+  late final TextEditingController _secondsController;
 
-  late int _minutes;
-  late int _seconds;
+  bool get _isExercise => widget.block is ExerciseBlock;
 
   @override
   void initState() {
@@ -33,7 +37,9 @@ class _EditBlockSheetState extends State<EditBlockSheet> {
 
     _nameController = TextEditingController(text: widget.block.title);
 
-    _valueController = TextEditingController(text: _repetitions.toString());
+    _repetitionsController = TextEditingController(
+      text: _repetitions.toString(),
+    );
 
     final Duration duration = switch (widget.block) {
       TimerBlock timer => timer.duration,
@@ -41,8 +47,13 @@ class _EditBlockSheetState extends State<EditBlockSheet> {
       _ => Duration.zero,
     };
 
-    _minutes = duration.inMinutes;
-    _seconds = duration.inSeconds % 60;
+    _minutesController = TextEditingController(
+      text: duration.inMinutes.toString(),
+    );
+
+    _secondsController = TextEditingController(
+      text: (duration.inSeconds % 60).toString(),
+    );
   }
 
   int get _repetitions {
@@ -52,12 +63,12 @@ class _EditBlockSheetState extends State<EditBlockSheet> {
     };
   }
 
-  bool get _isExercise => widget.block is ExerciseBlock;
-
   @override
   void dispose() {
     _nameController.dispose();
-    _valueController.dispose();
+    _repetitionsController.dispose();
+    _minutesController.dispose();
+    _secondsController.dispose();
     super.dispose();
   }
 
@@ -68,29 +79,38 @@ class _EditBlockSheetState extends State<EditBlockSheet> {
       return;
     }
 
+    final int repetitions = int.tryParse(_repetitionsController.text) ?? 1;
+
+    final int minutes = int.tryParse(_minutesController.text) ?? 0;
+
+    final int seconds = int.tryParse(_secondsController.text) ?? 0;
+
     final WorkoutBlock updatedBlock = switch (widget.block) {
       ExerciseBlock exercise => ExerciseBlock(
         id: exercise.id,
         title: title,
         note: exercise.note,
         accentColor: exercise.accentColor,
-        repetitions: int.tryParse(_valueController.text) ?? 1,
+        repetitions: repetitions,
         isCompleted: exercise.isCompleted,
       ),
+
       TimerBlock timer => TimerBlock(
         id: timer.id,
         title: title,
         note: timer.note,
         accentColor: timer.accentColor,
-        duration: Duration(minutes: _minutes, seconds: _seconds),
+        duration: Duration(minutes: minutes, seconds: seconds),
       ),
+
       RestBlock rest => RestBlock(
         id: rest.id,
         title: title,
         note: rest.note,
         accentColor: rest.accentColor,
-        duration: Duration(minutes: _minutes, seconds: _seconds),
+        duration: Duration(minutes: minutes, seconds: seconds),
       ),
+
       _ => widget.block,
     };
 
@@ -99,160 +119,36 @@ class _EditBlockSheetState extends State<EditBlockSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final double bottomInset = MediaQuery.viewInsetsOf(context).bottom;
-
-    return SafeArea(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + bottomInset),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('Edit Block', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 24),
-
-            TextField(
-              controller: _nameController,
-              textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(
-                labelText: 'Name',
-                border: OutlineInputBorder(),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            if (_isExercise)
-              TextField(
-                controller: _valueController,
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: const InputDecoration(
-                  labelText: 'Repetitions',
-                  border: OutlineInputBorder(),
-                ),
-              )
-            else
-              _DurationFields(
-                minutes: _minutes,
-                seconds: _seconds,
-                onMinutesChanged: (value) {
-                  setState(() {
-                    _minutes = value;
-                  });
-                },
-                onSecondsChanged: (value) {
-                  setState(() {
-                    _seconds = value;
-                  });
-                },
-              ),
-
-            const SizedBox(height: 24),
-
-            FilledButton(onPressed: _save, child: const Text('Save')),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DurationFields extends StatelessWidget {
-  const _DurationFields({
-    required this.minutes,
-    required this.seconds,
-    required this.onMinutesChanged,
-    required this.onSecondsChanged,
-  });
-
-  final int minutes;
-  final int seconds;
-
-  final ValueChanged<int> onMinutesChanged;
-  final ValueChanged<int> onSecondsChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(
-          child: _NumberField(
-            label: 'Minutes',
-            value: minutes,
-            onChanged: onMinutesChanged,
-          ),
+        AppTextField(
+          controller: _nameController,
+          label: 'Name',
+          textInputAction: _isExercise
+              ? TextInputAction.next
+              : TextInputAction.done,
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _NumberField(
-            label: 'Seconds',
-            value: seconds,
-            onChanged: onSecondsChanged,
+
+        const SizedBox(height: 16),
+
+        if (_isExercise)
+          AppNumberField(
+            controller: _repetitionsController,
+            label: 'Repetitions',
+            textInputAction: TextInputAction.done,
+          )
+        else
+          AppDurationFields(
+            minutesController: _minutesController,
+            secondsController: _secondsController,
           ),
-        ),
+
+        const SizedBox(height: 24),
+
+        FilledButton(onPressed: _save, child: const Text('Save')),
       ],
     );
-  }
-}
-
-class _NumberField extends StatelessWidget {
-  const _NumberField({
-    required this.label,
-    required this.value,
-    required this.onChanged,
-  });
-
-  final String label;
-  final int value;
-
-  final ValueChanged<int> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      initialValue: value.toString(),
-      keyboardType: TextInputType.number,
-      inputFormatters: [
-        FilteringTextInputFormatter.digitsOnly,
-        LengthLimitingTextInputFormatter(2),
-        _MaxValueInputFormatter(59),
-      ],
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-      ),
-      onChanged: (text) {
-        final int? value = int.tryParse(text);
-
-        if (value != null && value <= 59) {
-          onChanged(value);
-        }
-      },
-    );
-  }
-}
-
-class _MaxValueInputFormatter extends TextInputFormatter {
-  _MaxValueInputFormatter(this.maxValue);
-
-  final int maxValue;
-
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    if (newValue.text.isEmpty) {
-      return newValue;
-    }
-
-    final int? value = int.tryParse(newValue.text);
-
-    if (value == null || value > maxValue) {
-      return oldValue;
-    }
-
-    return newValue;
   }
 }
