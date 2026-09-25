@@ -26,41 +26,55 @@ class AppTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
-    return TextField(
-      controller: controller,
-      keyboardType: keyboardType,
-      textInputAction: textInputAction,
-      maxLines: maxLines,
-      autofocus: autofocus,
-      style: context.typography.bodyRegular,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hintText,
-        labelStyle: context.typography.bodyRegular.copyWith(
-          color: colorScheme.onSurface.withAlpha(150),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: context.typography.smallBold.copyWith(
+            color: colorScheme.onSurface.withAlpha(150),
+            letterSpacing: 0.8,
+          ),
         ),
-        hintStyle: context.typography.bodyRegular.copyWith(
-          color: colorScheme.onSurface.withAlpha(90),
+
+        const SizedBox(height: 8),
+
+        TextField(
+          controller: controller,
+          keyboardType: keyboardType,
+          textInputAction: textInputAction,
+          maxLines: maxLines,
+          autofocus: autofocus,
+          cursorColor: colorScheme.primary,
+          style: context.typography.medium.copyWith(
+            color: colorScheme.onSurface,
+          ),
+          decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: context.typography.medium.copyWith(
+              color: colorScheme.onSurface.withAlpha(80),
+            ),
+            filled: true,
+            fillColor: colorScheme.onSurface.withAlpha(8),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 14,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+            ),
+          ),
         ),
-        filled: true,
-        fillColor: colorScheme.surface,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: colorScheme.onSurface.withAlpha(30)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: colorScheme.onSurface.withAlpha(30)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
-        ),
-      ),
+      ],
     );
   }
 }

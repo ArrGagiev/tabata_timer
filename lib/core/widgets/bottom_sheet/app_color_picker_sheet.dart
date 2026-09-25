@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tabata_timer/core/widgets/bottom_sheet/app_sheet_button.dart';
 
 import '../../theme/app_colors.dart';
 import 'app_bottom_sheet.dart';
@@ -75,7 +76,7 @@ class _AppColorPickerSheetState extends State<AppColorPickerSheet> {
 
         const SizedBox(height: 28),
 
-        FilledButton(onPressed: _save, child: const Text('Save')),
+        AppSheetButton(label: 'Save', onPressed: _save),
       ],
     );
   }

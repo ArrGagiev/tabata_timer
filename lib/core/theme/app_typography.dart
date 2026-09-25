@@ -18,6 +18,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.headingSmall,
     required this.headingMedium,
     required this.headingLarge,
+    required this.headingXLarge,
+    required this.displayLarge,
   });
 
   final TextStyle extraSmallBold;
@@ -39,6 +41,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
   final TextStyle headingSmall;
   final TextStyle headingMedium;
   final TextStyle headingLarge;
+  final TextStyle headingXLarge;
+
+  final TextStyle displayLarge;
 
   /// Создаёт всю типографику приложения
   /// с указанным цветом текста.
@@ -143,6 +148,20 @@ class AppTypography extends ThemeExtension<AppTypography> {
         fontSize: 30,
         fontWeight: FontWeight.w900,
       ).copyWith(color: color),
+
+      // 24 / 900
+      headingXLarge: const TextStyle(
+        fontFamily: fontFamily,
+        fontSize: 24,
+        fontWeight: FontWeight.w900,
+      ).copyWith(color: color),
+
+      // 42 / 900
+      displayLarge: const TextStyle(
+        fontFamily: fontFamily,
+        fontSize: 42,
+        fontWeight: FontWeight.w900,
+      ).copyWith(color: color),
     );
   }
 
@@ -162,6 +181,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? headingSmall,
     TextStyle? headingMedium,
     TextStyle? headingLarge,
+    TextStyle? headingXLarge,
+    TextStyle? displayLarge,
   }) {
     return AppTypography(
       extraSmallBold: extraSmallBold ?? this.extraSmallBold,
@@ -178,6 +199,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
       headingSmall: headingSmall ?? this.headingSmall,
       headingMedium: headingMedium ?? this.headingMedium,
       headingLarge: headingLarge ?? this.headingLarge,
+      headingXLarge: headingXLarge ?? this.headingXLarge,
+      displayLarge: displayLarge ?? this.displayLarge,
     );
   }
 
@@ -206,6 +229,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
       headingSmall: TextStyle.lerp(headingSmall, other.headingSmall, t)!,
       headingMedium: TextStyle.lerp(headingMedium, other.headingMedium, t)!,
       headingLarge: TextStyle.lerp(headingLarge, other.headingLarge, t)!,
+      headingXLarge: TextStyle.lerp(headingXLarge, other.headingXLarge, t)!,
+      displayLarge: TextStyle.lerp(displayLarge, other.displayLarge, t)!,
     );
   }
 }

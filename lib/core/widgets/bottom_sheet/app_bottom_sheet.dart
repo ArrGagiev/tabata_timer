@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../theme/app_typography.dart';
+
 class AppBottomSheet extends StatelessWidget {
   const AppBottomSheet({
     super.key,
@@ -24,6 +26,7 @@ class AppBottomSheet extends StatelessWidget {
       showDragHandle: false,
       backgroundColor: Colors.transparent,
       elevation: 0,
+      barrierColor: Colors.black.withAlpha(180),
       builder: (context) {
         return AppBottomSheet(title: title, child: builder(context));
       },
@@ -34,36 +37,53 @@ class AppBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
+    final EdgeInsets resolvedPadding = padding.resolve(
+      Directionality.of(context),
+    );
+
     return SafeArea(
       top: false,
-      child: Container(
-        width: double.infinity,
-        padding: padding,
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      child: AnimatedPadding(
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOut,
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.viewInsetsOf(context).bottom,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                margin: const EdgeInsets.only(top: 12, bottom: 24),
-                decoration: BoxDecoration(
-                  color: colorScheme.onSurface.withAlpha(60),
-                  borderRadius: BorderRadius.circular(2),
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.only(
+            left: resolvedPadding.left,
+            right: resolvedPadding.right,
+            bottom: resolvedPadding.bottom,
+          ),
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  margin: const EdgeInsets.only(top: 12, bottom: 24),
+                  decoration: BoxDecoration(
+                    color: colorScheme.onSurface.withAlpha(60),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
-            ),
-            if (title != null) ...[
-              Text(title!, style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 20),
+
+              if (title != null) ...[
+                Text(title!, style: context.typography.titleBold),
+                const SizedBox(height: 20),
+              ],
+
+              child,
             ],
-            child,
-          ],
+          ),
         ),
       ),
     );

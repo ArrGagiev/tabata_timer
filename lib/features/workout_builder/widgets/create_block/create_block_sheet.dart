@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/bottom_sheet/app_bottom_sheet.dart';
 import '../../../../core/widgets/bottom_sheet/app_duration_fields.dart';
+import '../../../../core/widgets/bottom_sheet/app_sheet_button.dart';
 import '../../../../core/widgets/bottom_sheet/app_text_field.dart';
 import '../../../../core/widgets/bottom_sheet/app_number_field.dart';
 import '../../domain/models/workout_block.dart';
@@ -191,7 +192,7 @@ class _CreateBlockSheetState extends State<CreateBlockSheet> {
 
         const SizedBox(height: 28),
 
-        FilledButton(onPressed: _save, child: const Text('Add')),
+        AppSheetButton(label: 'Add', onPressed: _save),
       ],
     );
   }

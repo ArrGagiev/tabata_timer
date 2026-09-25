@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/widgets/bottom_sheet/app_bottom_sheet.dart';
+import '../../../core/widgets/bottom_sheet/app_sheet_button.dart';
 import '../../../core/widgets/bottom_sheet/app_text_field.dart';
 
 class CreateWorkoutSheet extends StatefulWidget {
@@ -59,7 +60,7 @@ class _CreateWorkoutSheetState extends State<CreateWorkoutSheet> {
 
         const SizedBox(height: 20),
 
-        FilledButton(onPressed: _createWorkout, child: const Text('Create')),
+        AppSheetButton(label: 'Create', onPressed: _createWorkout),
       ],
     );
   }

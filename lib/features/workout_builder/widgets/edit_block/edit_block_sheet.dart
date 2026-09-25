@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/widgets/bottom_sheet/app_bottom_sheet.dart';
 import '../../../../core/widgets/bottom_sheet/app_duration_fields.dart';
 import '../../../../core/widgets/bottom_sheet/app_number_field.dart';
+import '../../../../core/widgets/bottom_sheet/app_sheet_button.dart';
 import '../../../../core/widgets/bottom_sheet/app_text_field.dart';
 import '../../domain/models/workout_block.dart';
 
@@ -147,7 +148,7 @@ class _EditBlockSheetState extends State<EditBlockSheet> {
 
         const SizedBox(height: 24),
 
-        FilledButton(onPressed: _save, child: const Text('Save')),
+        AppSheetButton(label: 'Save', onPressed: _save),
       ],
     );
   }
